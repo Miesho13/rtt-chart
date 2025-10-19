@@ -125,7 +125,6 @@ namespace app {
             {
                 ": SAVE",
                 [this](const std::string& arg) {
-                    std::println("{}", arg);
                     csv::inst()->save_csv(arg);
                 }
             },
