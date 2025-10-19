@@ -1,0 +1,6 @@
+build
+raylib
+asio
+.vscode
+.cache
+build.log
