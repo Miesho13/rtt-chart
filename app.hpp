@@ -183,6 +183,31 @@ namespace app {
             }
         }
 
+        void draw_cursore() {
+            for (int cursor_y = 0; cursor_y < 2; cursor_y++) {
+                if (!cursors[cursor_y].enable) {
+                    continue;
+                }
+                
+                DrawLineEx( 
+                    {x_offset, (float)cursors[cursor_y].y}, 
+                    {(float)window_context.width, (float)cursors[cursor_y].y}, 
+                    1, RAYWHITE 
+                );
+
+                auto val_str = std::format("{:.2f}", cursors[cursor_y].value);
+                DrawText(val_str.c_str(), window_context.width - window_context.width*0.1, 
+                         (float)cursors[cursor_y].y + 2, 18, RAYWHITE);
+            }
+
+            if (cursors[0].enable && cursors[1].enable) {
+
+                auto val_str = std::format("{}", cursors[0].value - cursors[1].value);
+                DrawText(val_str.c_str(), x_offset + 10, 
+                         10, 20, RAYWHITE);
+            }
+        }
+
         // float probe_y_position(double val, int val_idx) {
         //     return (1.f - val/((double)scale.max_val - (double)scale.min_val)) * (double)window_context.heigth + scale.y_offset;
         // }
@@ -195,6 +220,16 @@ namespace app {
             normalized = std::clamp(normalized, 0.0, 1.0); // keep 0..1
 
             return (1.0f - (float)normalized) * (float)window_context.heigth + (float)scale.y_offset;
+        }
+
+        double probe_value_from_y(float y) {
+            double range = (double)scale.max_val - (double)scale.min_val;
+            if (range == 0.0) range = 1.0;  // avoid divide by zero
+
+            double normalized = 1.0 - ((double)y - (double)scale.y_offset) / (double)window_context.heigth;
+            normalized = std::clamp(normalized, 0.0, 1.0); // keep 0..1
+
+            return (double)scale.min_val + normalized * range;
         }
 
         void draw_plots() {
@@ -308,6 +343,12 @@ namespace app {
             bool visible_probe;
         } ui_plot_state;
 
+        struct {
+            bool enable;
+            float y;
+            float value;
+        } cursors[2];
+
         bool command_mod_on;
         std::string str_command;
 
@@ -349,6 +390,29 @@ namespace app {
         if (IsKeyPressed(KEY_P)) {
             plot_window.ui_plot_state.pause = !plot_window.ui_plot_state.pause;
         }
+
+
+        if (IsKeyDown(KEY_LEFT_SHIFT)) {
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {  
+                plot_window.cursors[0].enable = false;
+            }
+            if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {  
+                plot_window.cursors[1].enable = false;
+            }
+        }
+        else {
+            if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {  
+                plot_window.cursors[0].y = GetMouseY();
+                plot_window.cursors[0].enable = true;
+                plot_window.cursors[0].value = plot_window.probe_value_from_y(plot_window.cursors[0].y);
+            }
+
+            if (IsMouseButtonDown(MOUSE_BUTTON_RIGHT)) {  
+                plot_window.cursors[1].y = GetMouseY();
+                plot_window.cursors[1].enable = true;
+                plot_window.cursors[1].value = plot_window.probe_value_from_y(plot_window.cursors[1].y);
+            }
+        }
     }
 
     void csv_proprety_update() {
@@ -379,6 +443,7 @@ namespace app {
 
             plot_window.draw_plots();
             plot_window.draw_scale();
+            plot_window.draw_cursore();
             plot_window.command();
 
             EndDrawing();

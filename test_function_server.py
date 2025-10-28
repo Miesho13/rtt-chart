@@ -27,7 +27,7 @@ def main(host="127.0.0.1", port=9000, func_name="x"):
             while True:
                 value = fun(x, 50, 0, 200);
                 conn.sendall(f"I (1234) csv: {value}; {value+100};\n".encode("utf-8"))
-                time.sleep(0.020)
+                time.sleep(0.1)
                 x += 1
 
 if __name__ == "__main__":
