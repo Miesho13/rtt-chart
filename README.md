@@ -7,5 +7,5 @@ It is written in and uses **Raylib** for rendering and **Asio** for asynchronous
 ```
 :SET YMIN (VAL)
 :SET YMAX (VAL)
-:SAVE // savling csv 
+:SAVE (NAME) // deaflut name ./(time)_output.csv
 ```
